@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#C93A6B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Keep your Ajo or Esusu group records on your phone.">
+<title>Vestule Ajo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose: #C93A6B;
+    --rose-deep: #8E2149;
+    --blush: #FDEEF3;
+    --petal: #F5CFDC;
+    --plum: #3D1A2A;
+    --muted: #85566A;
+    --white: #FFFFFF;
+    --serif: "Young Serif", Georgia, "Times New Roman", serif;
+    --sans: Figtree, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--white);
+    color: var(--plum);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--rose); outline-offset: 2px; }
+
+  .app {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 18px calc(100px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Header */
+  header {
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 0 14px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .brand { font-family: var(--serif); font-size: 1.4rem; color: var(--rose-deep); margin: 0; font-weight: 400; }
+  .group-label { color: var(--muted); font-size: .95rem; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .warning {
+    background: #FFF4D6; color: #6B4A00; border-radius: 12px;
+    padding: 10px 14px; font-size: .9rem; margin-bottom: 14px;
+  }
+
+  /* Next payout: the one bold element */
+  .turn {
+    background: var(--rose);
+    color: var(--white);
+    border-radius: 28px;
+    padding: 22px 22px 24px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 26px;
+  }
+  .turn-coin {
+    width: 82px; height: 82px; border-radius: 50%;
+    background: var(--white); color: var(--rose-deep);
+    display: grid; place-items: center;
+    font-family: var(--serif); font-size: 2.3rem;
+    box-shadow: 0 0 0 6px rgba(255,255,255,.28);
+  }
+  .turn-kicker { font-size: .95rem; opacity: .9; margin: 0; }
+  .turn-name { font-family: var(--serif); font-size: 1.9rem; line-height: 1.15; margin: 2px 0 6px; word-break: break-word; font-weight: 400; }
+  .turn-detail { margin: 0; font-size: .95rem; opacity: .95; }
+  .turn-detail strong { font-weight: 700; }
+  .turn.done { grid-template-columns: 1fr; }
+  .turn .btn-light { margin-top: 12px; }
+
+  /* Section heads */
+  h2 { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; margin: 0; color: var(--plum); }
+  .sub { color: var(--muted); font-size: .92rem; margin: 2px 0 0; }
+
+  /* Round switcher */
+  .round-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .round-head .mid { text-align: center; flex: 1; }
+  .arrow {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1.5px solid var(--petal); background: var(--white);
+    display: grid; place-items: center; font-size: 1.2rem; color: var(--rose-deep);
+  }
+  .arrow:disabled { opacity: .35; cursor: default; }
+
+  .progress { height: 8px; background: var(--blush); border-radius: 99px; overflow: hidden; margin: 6px 0 4px; }
+  .progress span { display: block; height: 100%; background: var(--rose); border-radius: 99px; transition: width .25s ease; }
+  .progress-text { display: flex; justify-content: space-between; font-size: .9rem; color: var(--muted); margin-bottom: 10px; }
+
+  /* Member tick rows */
+  .ticks { list-style: none; margin: 0; padding: 0; }
+  .tick {
+    width: 100%; display: flex; align-items: center; gap: 14px;
+    background: none; border: 0; border-bottom: 1px solid var(--blush);
+    padding: 12px 2px; text-align: left; min-height: 60px;
+  }
+  .check {
+    flex: none; width: 30px; height: 30px; border-radius: 50%;
+    border: 2px solid var(--petal); display: grid; place-items: center;
+    transition: background .15s, border-color .15s;
+  }
+  .check svg { width: 16px; height: 16px; opacity: 0; }
+  .tick[aria-pressed="true"] .check { background: var(--rose); border-color: var(--rose); }
+  .tick[aria-pressed="true"] .check svg { opacity: 1; }
+  .tick-body { flex: 1; min-width: 0; }
+  .tick-name { font-weight: 600; display: block; overflow-wrap: anywhere; }
+  .tick-status { font-size: .88rem; color: var(--muted); }
+  .badge {
+    flex: none; font-size: .8rem; font-weight: 600; color: var(--rose-deep);
+    background: var(--blush); border-radius: 99px; padding: 4px 10px;
+  }
+
+  .round-foot { margin-top: 16px; padding: 16px; background: var(--blush); border-radius: 18px; }
+  .round-foot p { margin: 0 0 10px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 48px; padding: 0 20px; border-radius: 99px; border: 0;
+    background: var(--rose); color: var(--white); font-weight: 600; width: 100%;
+  }
+  .btn:active { background: var(--rose-deep); }
+  .btn-ghost { background: var(--white); color: var(--rose-deep); border: 1.5px solid var(--petal); }
+  .btn-light { background: var(--white); color: var(--rose-deep); width: auto; }
+  .btn-danger { background: var(--white); color: #A3192F; border: 1.5px solid #F0C2CA; }
+  .link-btn { background: none; border: 0; color: var(--rose-deep); text-decoration: underline; padding: 6px 0; font-size: .92rem; }
+
+  /* Members */
+  .add-row { display: flex; gap: 10px; margin: 14px 0 18px; }
+  .add-row input { flex: 1; }
+  .add-row .btn { width: auto; }
+  input[type="text"], input[type="number"], input[type="date"] {
+    width: 100%; min-height: 48px; padding: 10px 14px;
+    border: 1.5px solid var(--petal); border-radius: 14px; background: var(--white);
+    font-size: 16px;
+  }
+  input:focus { border-color: var(--rose); outline: none; }
+  .members { list-style: none; margin: 0; padding: 0; }
+  .member { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--blush); }
+  .pos {
+    flex: none; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--blush); color: var(--rose-deep);
+    display: grid; place-items: center; font-weight: 700; font-size: .9rem;
+  }
+  .member-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .member-name small { display: block; color: var(--muted); font-size: .82rem; }
+  .icon-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 10px;
+    border: 1.5px solid var(--blush); background: var(--white); color: var(--rose-deep);
+    display: grid; place-items: center; font-size: 1rem;
+  }
+  .icon-btn:disabled { opacity: .3; cursor: default; }
+  .icon-btn.remove { color: #A3192F; }
+
+  /* Setup */
+  .field { margin-bottom: 18px; }
+  .field label, .field legend { display: block; font-weight: 600; margin-bottom: 6px; padding: 0; }
+  .field .hint { font-size: .86rem; color: var(--muted); margin: 6px 0 0; }
+  fieldset { border: 0; margin: 0 0 18px; padding: 0; }
+  .money { position: relative; }
+  .money span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
+  .money input { padding-left: 34px; }
+  .segment { display: grid; grid-template-columns: 1fr 1fr; background: var(--blush); border-radius: 99px; padding: 4px; }
+  .segment input { position: absolute; opacity: 0; pointer-events: none; }
+  .segment label { margin: 0; text-align: center; padding: 10px; border-radius: 99px; font-weight: 600; color: var(--muted); cursor: pointer; }
+  .segment input:checked + label { background: var(--white); color: var(--rose-deep); box-shadow: 0 1px 4px rgba(142,33,73,.15); }
+  .segment input:focus-visible + label { outline: 3px solid var(--rose); }
+  .stack > * + * { margin-top: 10px; }
+  .divider { border: 0; border-top: 1px solid var(--blush); margin: 28px 0 20px; }
+
+  .empty { text-align: center; padding: 34px 10px; color: var(--muted); }
+  .empty p { margin: 0 0 16px; }
+  .intro { background: var(--blush); border-radius: 18px; padding: 16px 18px; margin-bottom: 22px; }
+  .intro p { margin: 0; }
+
+  .note {
+    margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--blush);
+    text-align: center; font-size: .88rem; color: var(--muted);
+  }
+
+  /* Bottom tabs */
+  nav {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,.96); border-top: 1px solid var(--petal);
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+    display: flex; justify-content: center; gap: 6px;
+  }
+  nav button {
+    flex: 1; max-width: 170px; min-height: 48px; border: 0; background: none;
+    border-radius: 14px; font-weight: 600; color: var(--muted);
+  }
+  nav button[aria-current="page"] { background: var(--blush); color: var(--rose-deep); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) translateY(10px); opacity: 0;
+    background: var(--plum); color: var(--white); padding: 10px 18px; border-radius: 99px;
+    font-size: .92rem; pointer-events: none; transition: opacity .2s, transform .2s;
+    max-width: 90vw; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1 class="brand">Vestule Ajo</h1>
+    <span class="group-label" id="groupLabel"></span>
+  </header>
+  <div id="warning"></div>
+  <main id="view"></main>
+  <p class="note">Vestule Ajo keeps records only. It does not hold or send money.</p>
+</div>
+
+<nav aria-label="Main">
+  <button data-tab="round">Rounds</button>
+  <button data-tab="members">Members</button>
+  <button data-tab="setup">Setup</button>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var KEY = 'vestule-ajo-v1';
+  var canSave = true;
+
+  function todayISO() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function toISO(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function parseISO(s) {
+    var p = (s || todayISO()).split('-').map(Number);
+    return new Date(p[0], p[1] - 1, p[2]);
+  }
+  function blank() {
+    return { name: '', amount: 0, freq: 'monthly', start: todayISO(), members: [], paid: {}, collected: {}, cycle: 1 };
+  }
+
+  // Load saved records
+  var state = blank();
+  try {
+    localStorage.setItem(KEY + '-test', '1');
+    localStorage.removeItem(KEY + '-test');
+    var saved = localStorage.getItem(KEY);
+    if (saved) state = Object.assign(blank(), JSON.parse(saved));
+  } catch (e) { canSave = false; }
+
+  function save() {
+    if (!canSave) return;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) { canSave = false; renderWarning(); }
+  }
+
+  var tab = state.amount > 0 ? 'round' : 'setup';
+  var viewRound = null;
+
+  // Helpers
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function naira(n) { return '\u20A6' + Number(n || 0).toLocaleString('en-NG'); }
+  function fmtDate(d) {
+    return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  function shortDate(iso) {
+    return parseISO(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+  function roundDate(r) {
+    var d = parseISO(state.start);
+    if (state.freq === 'weekly') {
+      d.setDate(d.getDate() + 7 * (r - 1));
+    } else {
+      var day = d.getDate();
+      d.setDate(1);
+      d.setMonth(d.getMonth() + (r - 1));
+      var last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      d.setDate(Math.min(day, last));
+    }
+    return d;
+  }
+  function total() { return state.members.length; }
+  function nextRound() {
+    for (var r = 1; r <= total(); r++) if (!state.collected[r]) return r;
+    return null;
+  }
+  function paidIn(r) { return state.paid[r] || {}; }
+  function paidCount(r) {
+    var p = paidIn(r);
+    return state.members.filter(function (m) { return p[m.id]; }).length;
+  }
+  function uid() { return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+
+  var CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // Views
+  function renderWarning() {
+    document.getElementById('warning').innerHTML = canSave ? '' :
+      '<div class="warning">This browser is not saving your records. Open Vestule Ajo in Chrome or Safari (not private mode) so your records stay on this phone.</div>';
+  }
+
+  function renderTurn() {
+    var n = total();
+    if (!n) return '';
+    var r = nextRound();
+    if (!r) {
+      return '<section class="turn done" aria-label="Payout status">' +
+        '<div><p class="turn-kicker">Cycle ' + state.cycle + ' is complete</p>' +
+        '<p class="turn-name">Everyone has collected</p>' +
+        '<p class="turn-detail">Start a new cycle to begin again with the same members.</p>' +
+        '<button class="btn btn-light" data-action="new-cycle">Start a new cycle</button></div></section>';
+    }
+    var m = state.members[r - 1];
+    var initial = m.name.trim().charAt(0).toUpperCase() || '?';
+    return '<section class="turn" aria-label="Next payout">' +
+      '<div class="turn-coin" aria-hidden="true">' + esc(initial) + '</div>' +
+      '<div><p class="turn-kicker">Next to collect</p>' +
+      '<p class="turn-name">' + esc(m.name) + '</p>' +
+      '<p class="turn-detail"><strong>' + naira(state.amount * n) + '</strong> on ' + fmtDate(roundDate(r)) + '</p>' +
+      '<p class="turn-detail">Round ' + r + ' of ' + n + '</p></div></section>';
+  }
+
+  function renderRound() {
+    var n = total();
+    if (!n) {
+      return '<div class="empty"><p>Add your group members to start the first round.</p>' +
+        '<button class="btn" data-tab="members">Add members</button></div>';
+    }
+    if (viewRound === null || viewRound > n) viewRound = nextRound() || n;
+    var r = viewRound;
+    var p = paidIn(r);
+    var count = paidCount(r);
+    var owing = (n - count) * state.amount;
+    var recipient = state.members[r - 1];
+    var collected = state.collected[r];
+    var isNext = nextRound() === r;
+
+    var rows = state.members.map(function (m) {
+      var on = !!p[m.id];
+      return '<li><button class="tick" data-action="toggle" data-id="' + m.id + '" aria-pressed="' + on + '">' +
+        '<span class="check">' + CHECK + '</span>' +
+        '<span class="tick-body"><span class="tick-name">' + esc(m.name) + '</span>' +
+        '<span class="tick-status">' + (on ? 'Paid on ' + shortDate(p[m.id]) : 'Not paid yet') + '</span></span>' +
+        (m.id === recipient.id ? '<span class="badge">Collects</span>' : '') +
+        '</button></li>';
+    }).join('');
+
+    var foot;
+    if (collected) {
+      foot = '<p><strong>' + esc(recipient.name) + '</strong> collected on ' + fmtDate(parseISO(collected)) + '.</p>' +
+        '<button class="link-btn" data-action="undo-payout">Undo payout record</button>';
+    } else if (isNext) {
+      foot = '<p>' + (owing > 0 ? naira(owing) + ' still owing this round.' : 'Everyone has paid this round.') + '</p>' +
+        '<button class="btn" data-action="payout">Mark ' + esc(recipient.name) + '\u2019s payout as done</button>';
+    } else {
+      foot = '<p>' + (owing > 0 ? naira(owing) + ' still owing this round.' : 'Everyone has paid this round.') + '</p>' +
+        '<p class="sub" style="margin:0">Payouts are marked in order. Round ' + nextRound() + ' is next.</p>';
+    }
+
+    return renderTurn() +
+      '<section aria-label="Round register">' +
+      '<div class="round-head">' +
+      '<button class="arrow" data-action="prev" aria-label="Previous round"' + (r <= 1 ? ' disabled' : '') + '>\u2039</button>' +
+      '<div class="mid"><h2>Round ' + r + '</h2><p class="sub">' + fmtDate(roundDate(r)) + '</p></div>' +
+      '<button class="arrow" data-action="next" aria-label="Next round"' + (r >= n ? ' disabled' : '') + '>\u203A</button>' +
+      '</div>' +
+      '<div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + count + '"><span style="width:' + (count / n * 100) + '%"></span></div>' +
+      '<div class="progress-text"><span>' + count + ' of ' + n + ' paid</span><span>' + naira(state.amount) + ' each</span></div>' +
+      '<ul class="ticks">' + rows + '</ul>' +
+      '<div class="round-foot">' + foot + '</div>' +
+      '</section>';
+  }
+
+  function renderMembers() {
+    var n = total();
+    var list = state.members.map(function (m, i) {
+      var r = i + 1;
+      var status = state.collected[r] ? 'Collected ' + shortDate(state.collected[r]) : 'Collects ' + fmtDate(roundDate(r));
+      return '<li class="member">' +
+        '<span class="pos" aria-label="Payout position ' + r + '">' + r + '</span>' +
+        '<span class="member-name">' + esc(m.name) + '<small>' + status + '</small></span>' +
+        '<button class="icon-btn" data-action="up" data-i="' + i + '" aria-label="Move ' + esc(m.name) + ' up"' + (i === 0 ? ' disabled' : '') + '>\u2191</button>' +
+        '<button class="icon-btn" data-action="down" data-i="' + i + '" aria-label="Move ' + esc(m.name) + ' down"' + (i === n - 1 ? ' disabled' : '') + '>\u2193</button>' +
+        '<button class="icon-btn remove" data-action="remove" data-i="' + i + '" aria-label="Remove ' + esc(m.name) + '">\u2715</button>' +
+        '</li>';
+    }).join('');
+
+    return '<section aria-label="Members">' +
+      '<h2>Members</h2>' +
+      '<p class="sub">The order of this list is the payout order.</p>' +
+      '<form class="add-row" id="addForm" autocomplete="off">' +
+      '<label for="newName" class="sr" style="position:absolute;left:-9999px">Member name</label>' +
+      '<input type="text" id="newName" placeholder="Member\u2019s name" maxlength="40" enterkeyhint="done">' +
+      '<button class="btn" type="submit">Add</button></form>' +
+      (n ? '<ul class="members">' + list + '</ul>' :
+        '<div class="empty"><p>No members yet. Add the first person who will collect.</p></div>') +
+      '</section>';
+  }
+
+  function renderSetup() {
+    var first = !(state.amount > 0);
+    return '<section aria-label="Group setup">' +
+      (first ? '<div class="intro"><p>Set up your group once. After that, Vestule Ajo shows whose turn is next and who has paid each round.</p></div>' : '') +
+      '<h2 style="margin-bottom:16px">Group setup</h2>' +
+      '<form id="setupForm" autocomplete="off">' +
+      '<div class="field"><label for="gName">Group name</label>' +
+      '<input type="text" id="gName" maxlength="40" placeholder="e.g. Market Women Ajo" value="' + esc(state.name) + '"></div>' +
+      '<div class="field"><label for="gAmount">Contribution per member</label>' +
+      '<div class="money"><span>\u20A6</span><input type="number" id="gAmount" inputmode="numeric" min="1" step="1" placeholder="5000" value="' + (state.amount || '') + '"></div>' +
+      '<p class="hint">What each member pays every round.</p></div>' +
+      '<fieldset><legend>How often</legend><div class="segment">' +
+      '<input type="radio" name="freq" id="fWeekly" value="weekly"' + (state.freq === 'weekly' ? ' checked' : '') + '><label for="fWeekly">Weekly</label>' +
+      '<input type="radio" name="freq" id="fMonthly" value="monthly"' + (state.freq === 'monthly' ? ' checked' : '') + '><label for="fMonthly">Monthly</label>' +
+      '</div></fieldset>' +
+      '<div class="field"><label for="gStart">First payout date</label>' +
+      '<input type="date" id="gStart" value="' + esc(state.start) + '"></div>' +
+      '<button class="btn" type="submit">Save setup</button></form>' +
+      (first ? '' :
+        '<hr class="divider"><div class="stack">' +
+        '<button class="btn btn-ghost" data-action="new-cycle">Start a new cycle</button>' +
+        '<button class="btn btn-danger" data-action="clear">Delete all records</button></div>') +
+      '</section>';
+  }
+
+  function render() {
+    document.getElementById('groupLabel').textContent = state.name || '';
+    var v = document.getElementById('view');
+    v.innerHTML = tab === 'round' ? renderRound() : tab === 'members' ? renderMembers() : renderSetup();
+    document.querySelectorAll('nav button').forEach(function (b) {
+      if (b.dataset.tab === tab) b.setAttribute('aria-current', 'page');
+      else b.removeAttribute('aria-current');
+    });
+    renderWarning();
+  }
+
+  function go(t) {
+    if (t !== 'setup' && !(state.amount > 0)) { toast('Save your group setup first.'); t = 'setup'; }
+    tab = t;
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  // Actions
+  document.addEventListener('click', function (e) {
+    var tabBtn = e.target.closest('[data-tab]');
+    if (tabBtn) { go(tabBtn.dataset.tab); return; }
+    var el = e.target.closest('[data-action]');
+    if (!el) return;
+    var a = el.dataset.action;
+    var n = total();
+
+    if (a === 'toggle') {
+      var r = viewRound;
+      state.paid[r] = state.paid[r] || {};
+      if (state.paid[r][el.dataset.id]) delete state.paid[r][el.dataset.id];
+      else state.paid[r][el.dataset.id] = todayISO();
+      save(); render();
+    }
+    else if (a === 'prev') { viewRound = Math.max(1, viewRound - 1); render(); }
+    else if (a === 'next') { viewRound = Math.min(n, viewRound + 1); render(); }
+    else if (a === 'payout') {
+      var pr = viewRound, c = paidCount(pr);
+      if (c < n && !confirm('Only ' + c + ' of ' + n + ' members have paid this round. Mark the payout as done anyway?')) return;
+      state.collected[pr] = todayISO();
+      save();
+      toast(state.members[pr - 1].name + '\u2019s payout recorded');
+      viewRound = nextRound() || pr;
+      render();
+    }
+    else if (a === 'undo-payout') {
+      var later = Object.keys(state.collected).some(function (k) { return Number(k) > viewRound; });
+      if (later) { alert('Undo the later payouts first. Payouts are recorded in order.'); return; }
+      delete state.collected[viewRound];
+      save(); render();
+    }
+    else if (a === 'up' || a === 'down') {
+      var i = Number(el.dataset.i), j = a === 'up' ? i - 1 : i + 1;
+      if (state.collected[i + 1] || state.collected[j + 1]) {
+        alert('The payout order is locked for members who have already collected this cycle.');
+        return;
+      }
+      var tmp = state.members[i]; state.members[i] = state.members[j]; state.members[j] = tmp;
+      save(); render();
+    }
+    else if (a === 'remove') {
+      var ri = Number(el.dataset.i), m = state.members[ri];
+      var blocked = Object.keys(state.collected).some(function (k) { return Number(k) - 1 >= ri; });
+      if (blocked) {
+        alert('Removing ' + m.name + ' would change who collected in past rounds. Start a new cycle before removing them.');
+        return;
+      }
+      if (!confirm('Remove ' + m.name + ' from the group? Their payment ticks will be deleted.')) return;
+      state.members.splice(ri, 1);
+      Object.keys(state.paid).forEach(function (k) { delete state.paid[k][m.id]; });
+      save(); render();
+    }
+    else if (a === 'new-cycle') {
+      if (!n) return;
+      if (!confirm('Start cycle ' + (state.cycle + 1) + '? Payment ticks and payouts from this cycle will be cleared. Members and setup stay the same.')) return;
+      state.start = toISO(roundDate(n + 1));
+      state.paid = {}; state.collected = {}; state.cycle += 1;
+      viewRound = null;
+      save(); toast('Cycle ' + state.cycle + ' started'); go('round');
+    }
+    else if (a === 'clear') {
+      if (!confirm('Delete every record on this phone, including members and setup? This cannot be undone.')) return;
+      state = blank(); viewRound = null;
+      save(); go('setup');
+    }
+  });
+
+  document.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (e.target.id === 'addForm') {
+      var input = document.getElementById('newName');
+      var name = input.value.trim();
+      if (!name) { input.focus(); return; }
+      var dup = state.members.some(function (m) { return m.name.toLowerCase() === name.toLowerCase(); });
+      if (dup && !confirm(name + ' is already in the group. Add another member with the same name?')) return;
+      state.members.push({ id: uid(), name: name });
+      save(); render();
+      document.getElementById('newName').focus();
+      toast(name + ' added');
+    }
+    if (e.target.id === 'setupForm') {
+      var amount = Math.round(Number(document.getElementById('gAmount').value));
+      if (!(amount > 0)) { toast('Enter the contribution amount in naira.'); document.getElementById('gAmount').focus(); return; }
+      var wasFirst = !(state.amount > 0);
+      state.name = document.getElementById('gName').value.trim();
+      state.amount = amount;
+      state.freq = document.querySelector('input[name="freq"]:checked').value;
+      state.start = document.getElementById('gStart').value || todayISO();
+      save();
+      toast('Setup saved');
+      go(wasFirst ? 'members' : 'round');
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
