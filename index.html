@@ -36,6 +36,7 @@
   button, input { font: inherit; color: inherit; }
   button { cursor: pointer; }
   :focus-visible { outline: 3px solid var(--rose); outline-offset: 2px; }
+  .sr { position: absolute; left: -9999px; }
 
   .app {
     max-width: 520px;
@@ -43,7 +44,6 @@
     padding: 0 18px calc(100px + env(safe-area-inset-bottom, 0px));
   }
 
-  /* Header */
   header {
     padding: calc(20px + env(safe-area-inset-top, 0px)) 0 14px;
     display: flex;
@@ -59,51 +59,39 @@
     padding: 10px 14px; font-size: .9rem; margin-bottom: 14px;
   }
 
-  /* Next payout: the one bold element */
+  /* Current round card: collector plus round summary */
   .turn {
     background: var(--rose);
     color: var(--white);
     border-radius: 28px;
-    padding: 22px 22px 24px;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 18px;
-    align-items: center;
-    margin-bottom: 26px;
+    padding: 22px 20px 20px;
+    margin-bottom: 22px;
   }
+  .turn-top { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
   .turn-coin {
-    width: 82px; height: 82px; border-radius: 50%;
+    width: 76px; height: 76px; border-radius: 50%;
     background: var(--white); color: var(--rose-deep);
     display: grid; place-items: center;
-    font-family: var(--serif); font-size: 2.3rem;
+    font-family: var(--serif); font-size: 2.1rem;
     box-shadow: 0 0 0 6px rgba(255,255,255,.28);
   }
   .turn-kicker { font-size: .95rem; opacity: .9; margin: 0; }
-  .turn-name { font-family: var(--serif); font-size: 1.9rem; line-height: 1.15; margin: 2px 0 6px; word-break: break-word; font-weight: 400; }
+  .turn-name { font-family: var(--serif); font-size: 1.8rem; line-height: 1.15; margin: 2px 0 4px; word-break: break-word; font-weight: 400; }
   .turn-detail { margin: 0; font-size: .95rem; opacity: .95; }
-  .turn-detail strong { font-weight: 700; }
-  .turn.done { grid-template-columns: 1fr; }
-  .turn .btn-light { margin-top: 12px; }
+  .turn.done .btn-light { margin-top: 14px; }
 
-  /* Section heads */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+  .stat { background: rgba(255,255,255,.16); border-radius: 16px; padding: 10px 10px 12px; min-width: 0; }
+  .stat-value { display: block; font-weight: 700; font-size: 1.12rem; line-height: 1.25; overflow-wrap: anywhere; }
+  .stat-label { display: block; font-size: .8rem; opacity: .92; margin-top: 2px; }
+
   h2 { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; margin: 0; color: var(--plum); }
   .sub { color: var(--muted); font-size: .92rem; margin: 2px 0 0; }
 
-  /* Round switcher */
-  .round-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-  .round-head .mid { text-align: center; flex: 1; }
-  .arrow {
-    width: 44px; height: 44px; border-radius: 50%;
-    border: 1.5px solid var(--petal); background: var(--white);
-    display: grid; place-items: center; font-size: 1.2rem; color: var(--rose-deep);
-  }
-  .arrow:disabled { opacity: .35; cursor: default; }
-
-  .progress { height: 8px; background: var(--blush); border-radius: 99px; overflow: hidden; margin: 6px 0 4px; }
+  .progress { height: 8px; background: var(--blush); border-radius: 99px; overflow: hidden; margin: 12px 0 4px; }
   .progress span { display: block; height: 100%; background: var(--rose); border-radius: 99px; transition: width .25s ease; }
-  .progress-text { display: flex; justify-content: space-between; font-size: .9rem; color: var(--muted); margin-bottom: 10px; }
+  .progress-text { display: flex; justify-content: space-between; font-size: .9rem; color: var(--muted); margin-bottom: 6px; }
 
-  /* Member tick rows */
   .ticks { list-style: none; margin: 0; padding: 0; }
   .tick {
     width: 100%; display: flex; align-items: center; gap: 14px;
@@ -128,11 +116,11 @@
 
   .round-foot { margin-top: 16px; padding: 16px; background: var(--blush); border-radius: 18px; }
   .round-foot p { margin: 0 0 10px; }
+  .back-link { text-align: center; margin-top: 8px; }
 
-  /* Buttons */
   .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-height: 48px; padding: 0 20px; border-radius: 99px; border: 0;
+    display: inline-flex; align-items: center; justify-content: center; text-align: center;
+    min-height: 48px; padding: 8px 20px; border-radius: 99px; border: 0;
     background: var(--rose); color: var(--white); font-weight: 600; width: 100%;
   }
   .btn:active { background: var(--rose-deep); }
@@ -168,11 +156,33 @@
   .icon-btn:disabled { opacity: .3; cursor: default; }
   .icon-btn.remove { color: #A3192F; }
 
+  /* History */
+  .cycle-head { font-weight: 600; color: var(--muted); font-size: .92rem; margin: 22px 0 6px; }
+  .past { border-bottom: 1px solid var(--blush); }
+  .past summary {
+    list-style: none; display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; cursor: pointer; min-height: 60px;
+  }
+  .past summary::-webkit-details-marker { display: none; }
+  .past-main { flex: 1; min-width: 0; }
+  .past-main strong { display: block; font-weight: 600; overflow-wrap: anywhere; }
+  .past-main small { color: var(--muted); font-size: .86rem; }
+  .past-count { flex: none; font-size: .85rem; font-weight: 600; color: var(--rose-deep); }
+  .chev { flex: none; color: var(--muted); transition: transform .2s; }
+  .past[open] .chev { transform: rotate(90deg); }
+  .past-body { padding: 0 0 16px 46px; }
+  .past-body h3 { font-size: .9rem; font-weight: 600; margin: 10px 0 4px; color: var(--plum); }
+  .past-body ul { list-style: none; margin: 0; padding: 0; }
+  .past-body li { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; font-size: .95rem; }
+  .past-body li span:last-child { color: var(--muted); font-size: .86rem; white-space: nowrap; }
+  .past-total { margin: 12px 0 0; padding: 10px 12px; background: var(--blush); border-radius: 12px; font-size: .92rem; }
+
   /* Setup */
   .field { margin-bottom: 18px; }
   .field label, .field legend { display: block; font-weight: 600; margin-bottom: 6px; padding: 0; }
   .field .hint { font-size: .86rem; color: var(--muted); margin: 6px 0 0; }
   fieldset { border: 0; margin: 0 0 18px; padding: 0; }
+  fieldset legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
   .money { position: relative; }
   .money span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
   .money input { padding-left: 34px; }
@@ -194,16 +204,15 @@
     text-align: center; font-size: .88rem; color: var(--muted);
   }
 
-  /* Bottom tabs */
   nav {
     position: fixed; left: 0; right: 0; bottom: 0;
     background: rgba(255,255,255,.96); border-top: 1px solid var(--petal);
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
-    display: flex; justify-content: center; gap: 6px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    display: flex; justify-content: center; gap: 4px;
   }
   nav button {
-    flex: 1; max-width: 170px; min-height: 48px; border: 0; background: none;
-    border-radius: 14px; font-weight: 600; color: var(--muted);
+    flex: 1; max-width: 130px; min-height: 48px; border: 0; background: none;
+    border-radius: 14px; font-weight: 600; color: var(--muted); font-size: .92rem;
   }
   nav button[aria-current="page"] { background: var(--blush); color: var(--rose-deep); }
 
@@ -216,6 +225,9 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  @media (max-width: 360px) {
+    .stat-value { font-size: 1rem; }
+  }
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
   }
@@ -233,7 +245,8 @@
 </div>
 
 <nav aria-label="Main">
-  <button data-tab="round">Rounds</button>
+  <button data-tab="round">Round</button>
+  <button data-tab="history">History</button>
   <button data-tab="members">Members</button>
   <button data-tab="setup">Setup</button>
 </nav>
@@ -244,19 +257,15 @@
   var KEY = 'vestule-ajo-v1';
   var canSave = true;
 
-  function todayISO() {
-    var d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  }
-  function toISO(d) {
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  }
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function toISO(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function todayISO() { return toISO(new Date()); }
   function parseISO(s) {
     var p = (s || todayISO()).split('-').map(Number);
     return new Date(p[0], p[1] - 1, p[2]);
   }
   function blank() {
-    return { name: '', amount: 0, freq: 'monthly', start: todayISO(), members: [], paid: {}, collected: {}, cycle: 1 };
+    return { name: '', amount: 0, freq: 'monthly', start: todayISO(), members: [], paid: {}, collected: {}, cycle: 1, log: [] };
   }
 
   // Load saved records
@@ -275,7 +284,6 @@
   }
 
   var tab = state.amount > 0 ? 'round' : 'setup';
-  var viewRound = null;
 
   // Helpers
   function esc(s) {
@@ -304,7 +312,7 @@
     return d;
   }
   function total() { return state.members.length; }
-  function nextRound() {
+  function currentRound() {
     for (var r = 1; r <= total(); r++) if (!state.collected[r]) return r;
     return null;
   }
@@ -314,6 +322,34 @@
     return state.members.filter(function (m) { return p[m.id]; }).length;
   }
   function uid() { return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  // A saved record of a finished round, kept by name so it survives later changes
+  function snapshot(r) {
+    var p = paidIn(r);
+    return {
+      cycle: state.cycle,
+      round: r,
+      rounds: total(),
+      due: toISO(roundDate(r)),
+      collector: state.members[r - 1].name,
+      collectedOn: state.collected[r],
+      amount: state.amount,
+      paid: state.members.filter(function (m) { return p[m.id]; }).map(function (m) { return { name: m.name, on: p[m.id] }; }),
+      unpaid: state.members.filter(function (m) { return !p[m.id]; }).map(function (m) { return m.name; })
+    };
+  }
+  function findLog(cycle, r) {
+    for (var i = 0; i < state.log.length; i++) {
+      if (state.log[i].cycle === cycle && state.log[i].round === r) return i;
+    }
+    return -1;
+  }
+
+  // Bring older saved data up to date: make history entries for payouts already marked
+  Object.keys(state.collected).forEach(function (k) {
+    var r = Number(k);
+    if (state.members[r - 1] && findLog(state.cycle, r) === -1) state.log.push(snapshot(r));
+  });
 
   var toastTimer;
   function toast(msg) {
@@ -332,25 +368,10 @@
       '<div class="warning">This browser is not saving your records. Open Vestule Ajo in Chrome or Safari (not private mode) so your records stay on this phone.</div>';
   }
 
-  function renderTurn() {
-    var n = total();
-    if (!n) return '';
-    var r = nextRound();
-    if (!r) {
-      return '<section class="turn done" aria-label="Payout status">' +
-        '<div><p class="turn-kicker">Cycle ' + state.cycle + ' is complete</p>' +
-        '<p class="turn-name">Everyone has collected</p>' +
-        '<p class="turn-detail">Start a new cycle to begin again with the same members.</p>' +
-        '<button class="btn btn-light" data-action="new-cycle">Start a new cycle</button></div></section>';
-    }
-    var m = state.members[r - 1];
-    var initial = m.name.trim().charAt(0).toUpperCase() || '?';
-    return '<section class="turn" aria-label="Next payout">' +
-      '<div class="turn-coin" aria-hidden="true">' + esc(initial) + '</div>' +
-      '<div><p class="turn-kicker">Next to collect</p>' +
-      '<p class="turn-name">' + esc(m.name) + '</p>' +
-      '<p class="turn-detail"><strong>' + naira(state.amount * n) + '</strong> on ' + fmtDate(roundDate(r)) + '</p>' +
-      '<p class="turn-detail">Round ' + r + ' of ' + n + '</p></div></section>';
+  function backLink(r) {
+    var prev = r === null ? total() : r - 1;
+    if (prev < 1 || !state.collected[prev]) return '';
+    return '<p class="back-link"><button class="link-btn" data-action="back">Go back to round ' + prev + '</button></p>';
   }
 
   function renderRound() {
@@ -359,14 +380,33 @@
       return '<div class="empty"><p>Add your group members to start the first round.</p>' +
         '<button class="btn" data-tab="members">Add members</button></div>';
     }
-    if (viewRound === null || viewRound > n) viewRound = nextRound() || n;
-    var r = viewRound;
+    var r = currentRound();
+    if (r === null) {
+      return '<section class="turn done" aria-label="Cycle status">' +
+        '<p class="turn-kicker">Cycle ' + state.cycle + ' is complete</p>' +
+        '<p class="turn-name">Everyone has collected</p>' +
+        '<p class="turn-detail">Every round is saved in History. Start a new cycle to begin again with the same members.</p>' +
+        '<button class="btn btn-light" data-action="new-cycle">Start a new cycle</button></section>' +
+        backLink(null);
+    }
+
     var p = paidIn(r);
     var count = paidCount(r);
-    var owing = (n - count) * state.amount;
-    var recipient = state.members[r - 1];
-    var collected = state.collected[r];
-    var isNext = nextRound() === r;
+    var collector = state.members[r - 1];
+    var initial = collector.name.trim().charAt(0).toUpperCase() || '?';
+    var left = n - count;
+
+    var card = '<section class="turn" aria-label="Current round">' +
+      '<div class="turn-top">' +
+      '<div class="turn-coin" aria-hidden="true">' + esc(initial) + '</div>' +
+      '<div><p class="turn-kicker">Round ' + r + ' of ' + n + '</p>' +
+      '<p class="turn-name">' + esc(collector.name) + '</p>' +
+      '<p class="turn-detail">Collects on ' + fmtDate(roundDate(r)) + '</p></div></div>' +
+      '<div class="stats">' +
+      '<div class="stat"><span class="stat-value">' + naira(count * state.amount) + '</span><span class="stat-label">Collected</span></div>' +
+      '<div class="stat"><span class="stat-value">' + naira(n * state.amount) + '</span><span class="stat-label">Expected</span></div>' +
+      '<div class="stat"><span class="stat-value">' + left + '</span><span class="stat-label">' + (left === 1 ? 'Member' : 'Members') + ' to pay</span></div>' +
+      '</div></section>';
 
     var rows = state.members.map(function (m) {
       var on = !!p[m.id];
@@ -374,34 +414,66 @@
         '<span class="check">' + CHECK + '</span>' +
         '<span class="tick-body"><span class="tick-name">' + esc(m.name) + '</span>' +
         '<span class="tick-status">' + (on ? 'Paid on ' + shortDate(p[m.id]) : 'Not paid yet') + '</span></span>' +
-        (m.id === recipient.id ? '<span class="badge">Collects</span>' : '') +
+        (m.id === collector.id ? '<span class="badge">Collects</span>' : '') +
         '</button></li>';
     }).join('');
 
-    var foot;
-    if (collected) {
-      foot = '<p><strong>' + esc(recipient.name) + '</strong> collected on ' + fmtDate(parseISO(collected)) + '.</p>' +
-        '<button class="link-btn" data-action="undo-payout">Undo payout record</button>';
-    } else if (isNext) {
-      foot = '<p>' + (owing > 0 ? naira(owing) + ' still owing this round.' : 'Everyone has paid this round.') + '</p>' +
-        '<button class="btn" data-action="payout">Mark ' + esc(recipient.name) + '\u2019s payout as done</button>';
-    } else {
-      foot = '<p>' + (owing > 0 ? naira(owing) + ' still owing this round.' : 'Everyone has paid this round.') + '</p>' +
-        '<p class="sub" style="margin:0">Payouts are marked in order. Round ' + nextRound() + ' is next.</p>';
-    }
+    var isLast = r === n;
+    var foot = '<div class="round-foot">' +
+      '<p>When ' + esc(collector.name) + ' has received the payout, record it here. ' +
+      (isLast ? 'This is the last round of the cycle.' : 'The ticks will reset for round ' + (r + 1) + ' and this round is saved in History.') + '</p>' +
+      '<button class="btn" data-action="payout">' +
+      (isLast ? 'Payout received, finish the cycle' : 'Payout received, go to round ' + (r + 1)) +
+      '</button></div>';
 
-    return renderTurn() +
-      '<section aria-label="Round register">' +
-      '<div class="round-head">' +
-      '<button class="arrow" data-action="prev" aria-label="Previous round"' + (r <= 1 ? ' disabled' : '') + '>\u2039</button>' +
-      '<div class="mid"><h2>Round ' + r + '</h2><p class="sub">' + fmtDate(roundDate(r)) + '</p></div>' +
-      '<button class="arrow" data-action="next" aria-label="Next round"' + (r >= n ? ' disabled' : '') + '>\u203A</button>' +
-      '</div>' +
-      '<div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + count + '"><span style="width:' + (count / n * 100) + '%"></span></div>' +
-      '<div class="progress-text"><span>' + count + ' of ' + n + ' paid</span><span>' + naira(state.amount) + ' each</span></div>' +
+    return card +
+      '<section aria-label="Payments this round">' +
+      '<h2>Who has paid</h2>' +
+      '<p class="sub">Tap a name to tick or untick. Each member pays ' + naira(state.amount) + '.</p>' +
+      '<div class="progress" role="progressbar" aria-label="Members paid" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + count + '"><span style="width:' + (count / n * 100) + '%"></span></div>' +
+      '<div class="progress-text"><span>' + count + ' of ' + n + ' paid</span></div>' +
       '<ul class="ticks">' + rows + '</ul>' +
-      '<div class="round-foot">' + foot + '</div>' +
+      foot + backLink(r) +
       '</section>';
+  }
+
+  function renderHistory() {
+    if (!state.log.length) {
+      return '<section aria-label="History"><h2>History</h2>' +
+        '<div class="empty"><p>Finished rounds appear here once you record the first payout.</p></div></section>';
+    }
+    var entries = state.log.slice().sort(function (a, b) {
+      return b.cycle - a.cycle || b.round - a.round;
+    });
+    var html = '<section aria-label="History"><h2>History</h2>' +
+      '<p class="sub">Tap a round to see who paid and who collected.</p>';
+    var lastCycle = null;
+    entries.forEach(function (e) {
+      if (e.cycle !== lastCycle) {
+        html += '<p class="cycle-head">Cycle ' + e.cycle + '</p>';
+        lastCycle = e.cycle;
+      }
+      var paidTotal = e.paid.length * e.amount;
+      var paidList = e.paid.length ? e.paid.map(function (p) {
+        return '<li><span>' + esc(p.name) + '</span><span>' + shortDate(p.on) + '</span></li>';
+      }).join('') : '<li><span>Nobody was ticked as paid</span></li>';
+      var unpaidList = e.unpaid.length ? e.unpaid.map(function (name) {
+        return '<li><span>' + esc(name) + '</span></li>';
+      }).join('') : '<li><span>Everyone paid</span></li>';
+
+      html += '<details class="past"><summary>' +
+        '<span class="pos" aria-hidden="true">' + e.round + '</span>' +
+        '<span class="past-main"><strong>Round ' + e.round + ': ' + esc(e.collector) + ' collected</strong>' +
+        '<small>Recorded on ' + fmtDate(parseISO(e.collectedOn)) + '</small></span>' +
+        '<span class="past-count">' + e.paid.length + ' of ' + (e.paid.length + e.unpaid.length) + ' paid</span>' +
+        '<span class="chev" aria-hidden="true">\u203A</span>' +
+        '</summary><div class="past-body">' +
+        '<h3>Paid</h3><ul>' + paidList + '</ul>' +
+        '<h3>Did not pay</h3><ul>' + unpaidList + '</ul>' +
+        '<p class="past-total">' + naira(paidTotal) + ' collected of ' + naira((e.paid.length + e.unpaid.length) * e.amount) + ' expected. Due date was ' + fmtDate(parseISO(e.due)) + '.</p>' +
+        '</div></details>';
+    });
+    return html + '</section>';
   }
 
   function renderMembers() {
@@ -422,7 +494,7 @@
       '<h2>Members</h2>' +
       '<p class="sub">The order of this list is the payout order.</p>' +
       '<form class="add-row" id="addForm" autocomplete="off">' +
-      '<label for="newName" class="sr" style="position:absolute;left:-9999px">Member name</label>' +
+      '<label for="newName" class="sr">Member name</label>' +
       '<input type="text" id="newName" placeholder="Member\u2019s name" maxlength="40" enterkeyhint="done">' +
       '<button class="btn" type="submit">Add</button></form>' +
       (n ? '<ul class="members">' + list + '</ul>' :
@@ -458,7 +530,10 @@
   function render() {
     document.getElementById('groupLabel').textContent = state.name || '';
     var v = document.getElementById('view');
-    v.innerHTML = tab === 'round' ? renderRound() : tab === 'members' ? renderMembers() : renderSetup();
+    v.innerHTML =
+      tab === 'round' ? renderRound() :
+      tab === 'history' ? renderHistory() :
+      tab === 'members' ? renderMembers() : renderSetup();
     document.querySelectorAll('nav button').forEach(function (b) {
       if (b.dataset.tab === tab) b.setAttribute('aria-current', 'page');
       else b.removeAttribute('aria-current');
@@ -483,28 +558,35 @@
     var n = total();
 
     if (a === 'toggle') {
-      var r = viewRound;
+      var r = currentRound();
+      if (r === null) return;
       state.paid[r] = state.paid[r] || {};
       if (state.paid[r][el.dataset.id]) delete state.paid[r][el.dataset.id];
       else state.paid[r][el.dataset.id] = todayISO();
       save(); render();
     }
-    else if (a === 'prev') { viewRound = Math.max(1, viewRound - 1); render(); }
-    else if (a === 'next') { viewRound = Math.min(n, viewRound + 1); render(); }
     else if (a === 'payout') {
-      var pr = viewRound, c = paidCount(pr);
-      if (c < n && !confirm('Only ' + c + ' of ' + n + ' members have paid this round. Mark the payout as done anyway?')) return;
+      var pr = currentRound(), c = paidCount(pr);
+      if (pr === null) return;
+      if (c < n && !confirm('Only ' + c + ' of ' + n + ' members have paid this round. Record the payout and move on anyway?')) return;
       state.collected[pr] = todayISO();
+      var idx = findLog(state.cycle, pr);
+      if (idx > -1) state.log.splice(idx, 1);
+      state.log.push(snapshot(pr));
       save();
-      toast(state.members[pr - 1].name + '\u2019s payout recorded');
-      viewRound = nextRound() || pr;
+      toast(pr === n ? 'Cycle ' + state.cycle + ' finished' : 'Round ' + pr + ' saved. Now on round ' + (pr + 1));
       render();
+      window.scrollTo(0, 0);
     }
-    else if (a === 'undo-payout') {
-      var later = Object.keys(state.collected).some(function (k) { return Number(k) > viewRound; });
-      if (later) { alert('Undo the later payouts first. Payouts are recorded in order.'); return; }
-      delete state.collected[viewRound];
+    else if (a === 'back') {
+      var cur = currentRound();
+      var prev = cur === null ? n : cur - 1;
+      if (!confirm('Go back to round ' + prev + '? Its ticks will come back so you can correct them, and it will be removed from History until you record the payout again.')) return;
+      delete state.collected[prev];
+      var li = findLog(state.cycle, prev);
+      if (li > -1) state.log.splice(li, 1);
       save(); render();
+      window.scrollTo(0, 0);
     }
     else if (a === 'up' || a === 'down') {
       var i = Number(el.dataset.i), j = a === 'up' ? i - 1 : i + 1;
@@ -522,22 +604,21 @@
         alert('Removing ' + m.name + ' would change who collected in past rounds. Start a new cycle before removing them.');
         return;
       }
-      if (!confirm('Remove ' + m.name + ' from the group? Their payment ticks will be deleted.')) return;
+      if (!confirm('Remove ' + m.name + ' from the group? Their ticks in the current cycle will be deleted. Saved history stays.')) return;
       state.members.splice(ri, 1);
       Object.keys(state.paid).forEach(function (k) { delete state.paid[k][m.id]; });
       save(); render();
     }
     else if (a === 'new-cycle') {
       if (!n) return;
-      if (!confirm('Start cycle ' + (state.cycle + 1) + '? Payment ticks and payouts from this cycle will be cleared. Members and setup stay the same.')) return;
+      if (!confirm('Start cycle ' + (state.cycle + 1) + '? Ticks reset for the new cycle. Members, setup and History stay the same.')) return;
       state.start = toISO(roundDate(n + 1));
       state.paid = {}; state.collected = {}; state.cycle += 1;
-      viewRound = null;
       save(); toast('Cycle ' + state.cycle + ' started'); go('round');
     }
     else if (a === 'clear') {
-      if (!confirm('Delete every record on this phone, including members and setup? This cannot be undone.')) return;
-      state = blank(); viewRound = null;
+      if (!confirm('Delete every record on this phone, including members, setup and History? This cannot be undone.')) return;
+      state = blank();
       save(); go('setup');
     }
   });
